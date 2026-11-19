@@ -24,6 +24,15 @@ mod tests {
 }
 
 fn main() {
+    // WebKitGTK on some aarch64 GPU/driver combinations aborts while creating
+    // its EGL display. Keep the ARM build usable by falling back to software
+    // compositing. This must be set before GTK/WebKit is initialized.
+    #[cfg(target_arch = "aarch64")]
+    {
+        std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    }
+
     tauri::Builder::default()
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_store::Builder::default().build())
